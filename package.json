@@ -4,11 +4,12 @@
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-ml-kit/barcode-scanning": "^1.4.0",
     "expo": "~50.0.1",
     "expo-barcode-scanner": "~12.9.2",
     "expo-camera": "~14.0.1",

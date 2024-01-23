@@ -1,12 +1,12 @@
 import { Camera, CameraType } from 'expo-camera';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import BarcodeScanning from '@react-native-ml-kit/barcode-scanning';
 
 export default function App() {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [scanned, setScanned] = useState(false);
+  let cameraRef = React.createRef();
 
   if (!permission) {
     // Camera permissions are still loading
@@ -27,22 +27,38 @@ export default function App() {
     setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    console.log(data);
-    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  };
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      let photo = await cameraRef.current.takePictureAsync();
+      return photo.uri;
+    }
+  }
+
+  const scanBarcodes = async (imageUri) => {
+    const barcodes = await BarcodeScanning.scan(imageUri);
+    for (let barcode of barcodes) {
+      console.log(barcode.value, barcode.format);
+    }
+  }
+
+  const takeAndScanPicture = async () => {
+    const imageUri = await takePicture();
+    await scanBarcodes(imageUri);
+  }
 
   return (
     <View style={styles.container}>
       <Camera 
         style={styles.camera} 
         type={type}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        ref={cameraRef}
       >
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
             <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={takeAndScanPicture}>
+            <Text style={styles.text}>Take and Scan</Text>
           </TouchableOpacity>
         </View>
       </Camera>
